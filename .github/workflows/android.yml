@@ -11,7 +11,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Switch to Upstream Nightly & Restore Baserom
+      - name: Clone Official OMM Source & Restore Baserom
         run: |
           # 1. Safely back up your ROM file
           if [ -f "baserom.us.z64" ]; then
@@ -20,13 +20,11 @@ jobs:
             cp baserom.z64 /tmp/baserom.us.z64
           fi
           
-          # 2. Connect to upstream repo, fetch nightly, and switch branches
-          git remote add upstream https://github.com/enessmr/sm64ex-omm.git
-          git fetch upstream nightly
-          git checkout -B nightly upstream/nightly
-          git submodule update --init --recursive
+          # 2. Clean workspace and clone the official source repository with submodules
+          rm -rf .git
+          git clone --recursive https://github.com/PeachyPeachSM64/sm64ex-omm.git .
           
-          # 3. Put your ROM back into the fresh nightly workspace
+          # 3. Put your ROM back into the workspace
           if [ -f "/tmp/baserom.us.z64" ]; then
             cp /tmp/baserom.us.z64 ./baserom.us.z64
             cp /tmp/baserom.us.z64 ./baserom.z64
