@@ -10,8 +10,30 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Setup Official Source & Baserom Safely
+        run: |
+          # 1. Safely back up your ROM file to /tmp
+          cp baserom*.z64 /tmp/ 2>/dev/null || true
+          
+          # 2. Clone the official OMM master branch into a temporary directory
+          git clone -b master --recursive https://github.com/PeachyPeachSM64/sm64ex-omm.git /tmp/omm_source
+          
+          # 3. Completely wipe the workspace root AND the blocking .git folder
+          rm -rf .git *
+          
+          # 4. Copy the official source files into the clean root directory
+          cp -r /tmp/omm_source/. ./
+          
+          # 5. Restore your ROM file into the root directory
+          cp /tmp/baserom*.z64 ./ 2>/dev/null || true
+          if [ -f "/tmp/baserom.us.z64" ]; then
+            cp /tmp/baserom.us.z64 ./baserom.us.z64
+            cp /tmp/baserom.us.z64 ./baserom.z64
+          fi
+          
+          # 6. Verify the Makefile and ROM are present
+          ls -la
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
