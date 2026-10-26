@@ -11,6 +11,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: nightly
           submodules: recursive
 
       - name: Set up JDK 17
@@ -22,7 +23,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential git wget zip unzip curl make python3 libglew-dev libsdl2-dev
+          sudo apt-get install -y build-essential git wget zip unzip curl make python3 libglew-dev libsdl2-dev patch
 
       - name: Setup Android SDK & NDK Manually
         run: |
@@ -41,16 +42,20 @@ jobs:
           echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
           echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
 
-      - name: Build OMM APK
+      - name: Apply 60FPS Patch
         run: |
-          echo "Listing root directory files:"
-          ls -la
+          if [ -f "tools/apply_patch.sh" ] && [ -f "enhancements/60fps_ex.patch" ]; then
+            bash tools/apply_patch.sh enhancements/60fps_ex.patch
+          fi
+
+      - name: Build OMM APK with Options & DynOS
+        run: |
           if [ -f "baserom.us.z64" ]; then
             cp baserom.us.z64 baserom.z64
           elif [ -f "baserom.z64" ]; then
             cp baserom.z64 baserom.us.z64
           fi
-          make -j$(nproc) TARGET_ANDROID=1 VERSION=us
+          make -j$(nproc) TARGET_ANDROID=1 VERSION=us EXT_OPTIONS_MENU=1 DYNOS=1
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
