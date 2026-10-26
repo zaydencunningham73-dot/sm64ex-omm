@@ -1,0 +1,35 @@
+name: Build Android APK
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup ESP
+        uses: electronicarts/setup-esp@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libglew-dev libsdl2-dev libssl-dev libusb-1.0-0-dev libopenal-dev zlib1g-dev git wget zip unzip curl make cmake pkg-config python3
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build OMM APK
+        run: |
+          make -j$(nproc) VERSION=us
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sm64ex-omm-apk
+          path: build/us_pc/*.apk
