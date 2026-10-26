@@ -16,8 +16,9 @@ jobs:
           # 1. Back up the baserom securely to /tmp
           cp baserom*.z64 /tmp/ 2>/dev/null || true
           
-          # 2. Completely clean the workspace so git clone can populate it fresh
-          rm -rf ./* .git
+          # 2. Completely wipe everything, including hidden files like .git
+          shopt -s dotglob
+          rm -rf *
           
           # 3. Clone the official OMM repository directly into the workspace root
           git clone --recursive https://github.com/PeachyPeachSM64/sm64ex-omm.git .
