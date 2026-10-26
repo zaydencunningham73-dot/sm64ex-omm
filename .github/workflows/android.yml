@@ -8,31 +8,36 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout User Fork to Subfolder
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           path: user_fork
 
       - name: Setup Official Source & Extract Baserom
         run: |
-          # 1. Copy your ROM file out of the subfolder into a safe temporary spot
+          # 1. Back up your ROM file from the subfolder to /tmp
           if [ -f "user_fork/baserom.us.z64" ]; then
-            cp user_fork/baserom.us.z64 ./baserom.us.z64
+            cp user_fork/baserom.us.z64 /tmp/baserom.us.z64
           elif [ -f "user_fork/baserom.z64" ]; then
-            cp user_fork/baserom.z64 ./baserom.us.z64
+            cp user_fork/baserom.z64 /tmp/baserom.us.z64
           fi
-          cp user_fork/*.z64 ./ 2>/dev/null || true
+          cp user_fork/*.z64 /tmp/ 2>/dev/null || true
 
-          # 2. Clone the official OMM source directly into the clean root directory
+          # 2. Completely clean out the root directory (including hidden files)
+          shopt -s dotglob
+          rm -rf *
+
+          # 3. Clone the official OMM source cleanly into the root directory
           git clone --recursive https://github.com/PeachyPeachSM64/sm64ex-omm.git .
 
-          # 3. Ensure the baserom is in place for the compiler
-          if [ -f "user_fork/baserom.us.z64" ]; then
-            cp user_fork/baserom.us.z64 ./baserom.us.z64
-            cp user_fork/baserom.us.z64 ./baserom.z64
+          # 4. Restore your ROM file into the workspace
+          cp /tmp/baserom*.z64 ./ 2>/dev/null || true
+          if [ -f "/tmp/baserom.us.z64" ]; then
+            cp /tmp/baserom.us.z64 ./baserom.us.z64
+            cp /tmp/baserom.us.z64 ./baserom.z64
           fi
 
-          # 4. Verify everything is in place
+          # 5. Verify everything is in place
           ls -la
 
       - name: Set up JDK 17
