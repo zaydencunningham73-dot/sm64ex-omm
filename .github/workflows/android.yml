@@ -8,11 +8,27 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout
+      - name: Checkout Master & Save Baserom
         uses: actions/checkout@v4
-        with:
-          ref: nightly
-          submodules: recursive
+
+      - name: Clone Upstream Nightly & Restore Baserom
+        run: |
+          # Save your ROM file safely
+          if [ -f "baserom.us.z64" ]; then
+            cp baserom.us.z64 /tmp/baserom.us.z64
+          elif [ -f "baserom.z64" ]; then
+            cp baserom.z64 /tmp/baserom.us.z64
+          fi
+          
+          # Clean workspace and clone official nightly source with submodules
+          rm -rf .git
+          git clone --recursive -b nightly https://github.com/enessmr/sm64ex-omm.git .
+          
+          # Put your ROM file back into the source directory
+          if [ -f "/tmp/baserom.us.z64" ]; then
+            cp /tmp/baserom.us.z64 ./baserom.us.z64
+            cp /tmp/baserom.us.z64 ./baserom.z64
+          fi
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -50,11 +66,6 @@ jobs:
 
       - name: Build OMM APK with Options & DynOS
         run: |
-          if [ -f "baserom.us.z64" ]; then
-            cp baserom.us.z64 baserom.z64
-          elif [ -f "baserom.z64" ]; then
-            cp baserom.z64 baserom.us.z64
-          fi
           make -j$(nproc) TARGET_ANDROID=1 VERSION=us EXT_OPTIONS_MENU=1 DYNOS=1
 
       - name: Upload APK
