@@ -11,7 +11,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Clone Official OMM Source & Restore Baserom
+      - name: Fetch Official Source & Restore Baserom
         run: |
           # 1. Safely back up your ROM file
           if [ -f "baserom.us.z64" ]; then
@@ -20,11 +20,13 @@ jobs:
             cp baserom.z64 /tmp/baserom.us.z64
           fi
           
-          # 2. Clean workspace and clone the official source repository with submodules
-          rm -rf .git
-          git clone --recursive https://github.com/PeachyPeachSM64/sm64ex-omm.git .
+          # 2. Clone the official source into a temporary folder
+          git clone --recursive https://github.com/PeachyPeachSM64/sm64ex-omm.git /tmp/omm_source
           
-          # 3. Put your ROM back into the workspace
+          # 3. Copy the official source files into your workspace
+          cp -r /tmp/omm_source/. .
+          
+          # 4. Put your ROM back into the workspace
           if [ -f "/tmp/baserom.us.z64" ]; then
             cp /tmp/baserom.us.z64 ./baserom.us.z64
             cp /tmp/baserom.us.z64 ./baserom.z64
