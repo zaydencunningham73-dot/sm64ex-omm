@@ -8,23 +8,25 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout Master & Save Baserom
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Clone Upstream Nightly & Restore Baserom
+      - name: Switch to Upstream Nightly & Restore Baserom
         run: |
-          # Save your ROM file safely
+          # 1. Safely back up your ROM file
           if [ -f "baserom.us.z64" ]; then
             cp baserom.us.z64 /tmp/baserom.us.z64
           elif [ -f "baserom.z64" ]; then
             cp baserom.z64 /tmp/baserom.us.z64
           fi
           
-          # Clean workspace and clone official nightly source with submodules
-          rm -rf .git
-          git clone --recursive -b nightly https://github.com/enessmr/sm64ex-omm.git .
+          # 2. Connect to upstream repo, fetch nightly, and switch branches
+          git remote add upstream https://github.com/enessmr/sm64ex-omm.git
+          git fetch upstream nightly
+          git checkout -B nightly upstream/nightly
+          git submodule update --init --recursive
           
-          # Put your ROM file back into the source directory
+          # 3. Put your ROM back into the fresh nightly workspace
           if [ -f "/tmp/baserom.us.z64" ]; then
             cp /tmp/baserom.us.z64 ./baserom.us.z64
             cp /tmp/baserom.us.z64 ./baserom.z64
