@@ -43,7 +43,13 @@ jobs:
 
       - name: Build OMM APK
         run: |
-          # Copy baserom to root if needed and build
+          echo "Listing root directory files:"
+          ls -la
+          if [ -f "baserom.us.z64" ]; then
+            cp baserom.us.z64 baserom.z64
+          elif [ -f "baserom.z64" ]; then
+            cp baserom.z64 baserom.us.z64
+          fi
           make -j$(nproc) TARGET_ANDROID=1 VERSION=us
 
       - name: Upload APK
