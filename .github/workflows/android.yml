@@ -20,8 +20,8 @@ jobs:
           shopt -s dotglob
           rm -rf *
           
-          # 3. Clone the official OMM repository directly into the workspace root
-          git clone --recursive https://github.com/PeachyPeachSM64/sm64ex-omm.git .
+          # 3. Clone the official OMM nightly branch directly into the workspace root
+          git clone -b nightly --recursive https://github.com/PeachyPeachSM64/sm64ex-omm.git .
           
           # 4. Restore the baserom back into the root directory
           cp /tmp/baserom*.z64 ./ 2>/dev/null || true
